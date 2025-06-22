@@ -1,51 +1,74 @@
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import javax.imageio.ImageIO;
+import java.io.File;
+import java.io.IOException;
 
-public class FlowerItem implements InteractiveItem {
-    private Image image;
-    private int x, y;
-    private double rotation;
+public class FlowerItem extends CreationItem {
+    private BufferedImage image;
 
-    public FlowerItem(String path, int x, int y) {
-        this.image = new ImageIcon(path).getImage();
-        this.x = x;
-        this.y = y;
+    public FlowerItem(int x, int y, String resourcePath) {
+        super(x, y);
+        loadImage(resourcePath);
+    }
+
+    // Constructor to set initial dimensions (Req 2)
+    public FlowerItem(int x, int y, String resourcePath, int desiredWidth, int desiredHeight) {
+        super(x, y);
+        loadImage(resourcePath);
+        if (this.image != null) {
+            double originalWidth = this.width;
+            double originalHeight = this.height;
+            if (originalWidth > 0 && originalHeight > 0 && desiredWidth > 0 && desiredHeight > 0) {
+                double scaleX = (double) desiredWidth / originalWidth;
+                double scaleY = (double) desiredHeight / originalHeight;
+                this.scaleFactor = Math.min(scaleX, scaleY);
+            }
+        } else {
+            this.width = desiredWidth > 0 ? desiredWidth : 50;
+            this.height = desiredHeight > 0 ? desiredHeight : 50;
+            this.scaleFactor = 1.0;
+        }
+    }
+
+    private void loadImage(String resourcePath) {
+        try {
+            java.net.URL imageUrl = getClass().getResource(resourcePath);
+            if (imageUrl == null) {
+                System.err.println("Flower resource not found: " + resourcePath);
+                setDefaultSizeOnError();
+                return;
+            }
+            image = ImageIO.read(imageUrl);
+            if (image != null) {
+                this.width = image.getWidth();
+                this.height = image.getHeight();
+            } else {
+                System.err.println("Failed to load flower image (ImageIO.read returned null): " + resourcePath);
+                setDefaultSizeOnError();
+            }
+        } catch (IOException e) {
+            System.err.println("IOException loading flower image: " + resourcePath);
+            e.printStackTrace(); // Print stack trace for better debugging
+            setDefaultSizeOnError();
+        }
+    }
+
+    private void setDefaultSizeOnError() {
+        this.image = null;
+        this.width = 50;
+        this.height = 50;
     }
 
     @Override
-    public void draw(Graphics g) {
-        Graphics2D g2d = (Graphics2D) g.create();
-        int w = image.getWidth(null);
-        int h = image.getHeight(null);
-        g2d.rotate(Math.toRadians(rotation), x + w / 2, y + h / 2);
-        g2d.drawImage(image, x, y, null);
-        g2d.dispose();
-    }
-
-    @Override
-    public void rotate(double angle) {
-        this.rotation += angle;
-    }
-
-    @Override
-    public void flip() {
-        // Optional: implement flipping
-    }
-
-    @Override
-    public void scale(double factor) {
-        // Optional: implement scaling
-    }
-
-    @Override
-    public void move(int dx, int dy) {
-        this.x += dx;
-        this.y += dy;
-    }
-
-    @Override
-    public boolean contains(Point p) {
-        Rectangle bounds = new Rectangle(x, y, image.getWidth(null), image.getHeight(null));
-        return bounds.contains(p);
+    protected void drawContent(Graphics2D g2d) {
+        if (image != null) {
+            g2d.drawImage(image, 0, 0, this.width, this.height, null);
+        } else {
+            g2d.setColor(java.awt.Color.PINK);
+            g2d.fillRect(0, 0, this.width, this.height);
+            g2d.setColor(java.awt.Color.BLACK);
+            g2d.drawString("Flower", 5, this.height / 2);
+        }
     }
 }

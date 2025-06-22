@@ -1,45 +1,33 @@
-import java.awt.*;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 
-public class CustomImageItem implements InteractiveItem {
-    private Image image;
-    private int x, y;
-    private double rotation;
+public class CustomImageItem extends CreationItem {
+    private BufferedImage image;
 
-    public CustomImageItem(Image image, int x, int y) {
+    public CustomImageItem(int x, int y, BufferedImage image) {
+        super(x, y);
         this.image = image;
-        this.x = x;
-        this.y = y;
+        if (image != null) {
+            this.width = image.getWidth();
+            this.height = image.getHeight();
+        } else {
+            // Handle null image case, e.g., set default size
+            this.width = 50;
+            this.height = 50;
+            System.err.println("CustomImageItem created with null image.");
+        }
     }
 
     @Override
-    public void draw(Graphics g) {
-        Graphics2D g2d = (Graphics2D) g.create();
-        int w = image.getWidth(null);
-        int h = image.getHeight(null);
-        g2d.rotate(Math.toRadians(rotation), x + w / 2, y + h / 2);
-        g2d.drawImage(image, x, y, null);
-        g2d.dispose();
-    }
-
-    @Override
-    public void rotate(double angle) {
-        this.rotation += angle;
-    }
-
-    @Override
-    public void flip() {}
-
-    @Override
-    public void scale(double factor) {}
-
-    @Override
-    public void move(int dx, int dy) {
-        this.x += dx;
-        this.y += dy;
-    }
-
-    @Override
-    public boolean contains(Point p) {
-        return new Rectangle(x, y, image.getWidth(null), image.getHeight(null)).contains(p);
+    protected void drawContent(Graphics2D g2d) {
+        if (image != null) {
+            g2d.drawImage(image, 0, 0, this.width, this.height, null);
+        } else {
+            // Draw a placeholder if image is null
+            g2d.setColor(java.awt.Color.GRAY);
+            g2d.fillRect(0, 0, this.width, this.height);
+            g2d.setColor(java.awt.Color.BLACK);
+            g2d.drawString("Custom", 5, this.height / 2);
+        }
     }
 }

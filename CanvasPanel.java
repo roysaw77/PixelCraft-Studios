@@ -116,6 +116,10 @@ public class CanvasPanel extends JPanel {
         }
     }
 
+    public boolean isCompositionCanvas() {
+        return isCompositionCanvas;
+    }
+
     public void addItem(DrawableItem item) {
         items.add(item);
         repaint();

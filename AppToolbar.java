@@ -1,112 +1,91 @@
 import javax.swing.*;
-import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.awt.Image;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 public class AppToolbar extends JToolBar {
-    private JFrame owner;
-    private CanvasPanel leftCanvas;
-    private CanvasPanel rightCanvas;
-    private List<BufferedImage> library = new ArrayList<>();
-
-    private JSlider canvasRotationSlider;
     private JSlider itemRotationSlider;
+
+    private static final int ICON_WIDTH = 24;
+    private static final int ICON_HEIGHT = 24;
+
     public AppToolbar(JFrame owner, CanvasPanel leftCanvas, CanvasPanel rightCanvas) {
         super("Drawing Tools");
-        this.owner = owner;
-        this.leftCanvas = leftCanvas;
-        this.rightCanvas = rightCanvas;
-        createToolbarComponents();
-}
-    public JSlider getItemRotationSlider() {
-        return itemRotationSlider;
-    }
+        List<BufferedImage> library = new ArrayList<>();
 
-    private void createToolbarComponents() {
-        int iconSize = 16;
-        Dimension shortButtonSize = new Dimension(110, 26);
-        Dimension smallButtonSize = new Dimension(90, 26);
-        Dimension tinyButtonSize = new Dimension(80, 26);
-
-        // Canvas Actions
-        add(createButtonFromAction(new ClearCanvasAction("Clear Comp", createIcon("/icons/new_canvas.png", iconSize), leftCanvas), shortButtonSize));
-        add(createButtonFromAction(new ClearCanvasAction("Clear Draw", createIcon("/icons/new_drawing.png", iconSize), rightCanvas), shortButtonSize));
+        // --- Actions ---
+        add(new CanvasActions.ClearCanvasAction("Clear Comp", loadIcon("new_canvas.png"), leftCanvas));
+        add(new CanvasActions.ClearCanvasAction("Clear Draw", loadIcon("new_drawing.png"), rightCanvas));
         addSeparator();
 
-        // Drawing Actions
-        add(createButtonFromAction(new ChangePenColorAction("Pen Color", createIcon("/icons/color_picker.png", iconSize), owner, rightCanvas), shortButtonSize));
-        add(createButtonFromAction(new ChangePenSizeAction("Pen Size", createIcon("/icons/stroke_size.png", iconSize), owner, rightCanvas), shortButtonSize));
-        addSeparator();
-
-        // Add Asset Actions
+        // --- Asset Creation using a single Factory ---
+        ItemFactory itemFactory = (x, y, path, w, h) -> new ImageCreationItem(x, y, path, w, h);
         String[] animalAssets = {"Lion", "Tiger", "Elephant", "Bear"};
-        add(createButtonFromAction(new AddAssetAction("Animal", createIcon("/icons/add_animal.png", iconSize), owner, leftCanvas, animalAssets, "/assets/animals/", (x, y, path, w, h) -> new AnimalItem(x, y, path, w, h)), smallButtonSize));
-
+        add(new CanvasActions.AddAssetAction("Animal", loadIcon("add_animal.png"), owner, leftCanvas, animalAssets, "/assets/animals/", itemFactory));
         String[] flowerAssets = {"Rose", "Tulip", "Sunflower", "Daisy"};
-        add(createButtonFromAction(new AddAssetAction("Flower", createIcon("/icons/add_flower.png", iconSize), owner, leftCanvas, flowerAssets, "/assets/flowers/", (x, y, path, w, h) -> new FlowerItem(x, y, path, w, h)), smallButtonSize));
+        add(new CanvasActions.AddAssetAction("Flower", loadIcon("add_flower.png"), owner, leftCanvas, flowerAssets, "/assets/flowers/", itemFactory));
         addSeparator();
 
-        // Save and Library Actions
-        add(createButtonFromAction(new SaveDrawingAction("Save Draw", createIcon("/icons/save.png", iconSize), owner, rightCanvas, library), shortButtonSize));
-        add(createButtonFromAction(new SaveCompositionAction("Save Comp", createIcon("/icons/save_composition.png", iconSize), owner, leftCanvas), shortButtonSize));
-        add(createButtonFromAction(new AddFromLibraryAction("Lib Custom", createIcon("/icons/add_custom_library.png", iconSize), owner, leftCanvas, library), shortButtonSize));
+        // --- Save and Library ---
+        add(new CanvasActions.SaveDrawingAction("Save Draw", loadIcon("save.png"), owner, rightCanvas, library));
+        add(new CanvasActions.SaveCompositionAction("Save Comp", loadIcon("save_composition.png"), owner, leftCanvas));
+        add(new CanvasActions.AddFromLibraryAction("From Lib", loadIcon("add_custom_library.png"), owner, leftCanvas, library));
         addSeparator();
 
-        // Canvas Rotation Slider
+        // --- Pen Tools ---
+        add(new CanvasActions.ChangePenColorAction("Pen Color", loadIcon("color_picker.png"), owner, rightCanvas));
+        add(new CanvasActions.ChangePenSizeAction("Pen Size", loadIcon("stroke_size.png"), owner, rightCanvas));
+        addSeparator();
+
+        // --- Sliders and Manipulation ---
         add(new JLabel("Canvas Rot:"));
-        canvasRotationSlider = new JSlider(0, 359, 0);
-        canvasRotationSlider.setToolTipText("Rotate the entire left canvas");
-        canvasRotationSlider.setPreferredSize(new Dimension(200, canvasRotationSlider.getPreferredSize().height));
-        canvasRotationSlider.addChangeListener(e -> {
-            if (leftCanvas != null) {
-                leftCanvas.setCanvasRotationAngle(canvasRotationSlider.getValue());
-            }
-        });
+        JSlider canvasRotationSlider = new JSlider(0, 359, 0);
+        canvasRotationSlider.addChangeListener(e -> leftCanvas.setCanvasRotationAngle(canvasRotationSlider.getValue()));
         add(canvasRotationSlider);
 
-        // Selected Item Rotation Slider
         add(new JLabel("Item Rot:"));
         itemRotationSlider = new JSlider(0, 359, 0);
-        itemRotationSlider.setToolTipText("Rotate the selected item on the left canvas");
-        itemRotationSlider.setPreferredSize(new Dimension(200, itemRotationSlider.getPreferredSize().height));
         itemRotationSlider.setEnabled(false);
         itemRotationSlider.addChangeListener(e -> {
             DrawableItem selected = leftCanvas.getSelectedItem();
-            if (selected instanceof CreationItem && itemRotationSlider.isEnabled()) {
+            if (selected instanceof CreationItem) {
                 ((CreationItem) selected).setRotationAngle(itemRotationSlider.getValue());
                 leftCanvas.repaint();
             }
         });
         add(itemRotationSlider);
+        addSeparator();
 
-        // Item Manipulation Actions
-        add(createButtonFromAction(new ManipulateItemAction("Rot Item", "Rotate selected item by 15 degrees", leftCanvas, item -> item.rotate(15)), tinyButtonSize));
-        add(createButtonFromAction(new ManipulateItemAction("Flip Item", "Flip selected item horizontally", leftCanvas, DrawableItem::flip), tinyButtonSize));
-        add(createButtonFromAction(new ManipulateItemAction("Scale Up", "Increase size of selected item", leftCanvas, item -> item.scale(1.1)), tinyButtonSize));
-        add(createButtonFromAction(new ManipulateItemAction("Scale Down", "Decrease size of selected item", leftCanvas, item -> item.scale(0.9)), tinyButtonSize));
-        addSeparator(new Dimension(10, 0));
+        add(new CanvasActions.ManipulateItemAction("Rot", loadIcon("rotate.png"), "Rotate Item", leftCanvas, item -> item.rotate(15)));
+        add(new CanvasActions.ManipulateItemAction("Flip", loadIcon("flip.png"), "Flip Item", leftCanvas, DrawableItem::flip));
+        addSeparator();
 
-        // Merge Action
-        add(createButtonFromAction(new MergeCanvasAction("Merge", createIcon("/icons/merge.png", iconSize), owner, leftCanvas, canvasRotationSlider), tinyButtonSize));
+        // --- Merge Action ---
+        add(new CanvasActions.MergeCanvasAction("Merge", loadIcon("merge.png"), leftCanvas, canvasRotationSlider));
     }
 
-    private JButton createButtonFromAction(Action action, Dimension size) {
-        JButton button = new JButton(action);
-        button.setPreferredSize(size);
-        button.setToolTipText((String) action.getValue(Action.SHORT_DESCRIPTION));
-        return button;
+    public JSlider getItemRotationSlider() {
+        return itemRotationSlider;
     }
 
-    private ImageIcon createIcon(String path, int size) {
-        try {
-            ImageIcon icon = new ImageIcon(getClass().getResource(path));
-            return new ImageIcon(icon.getImage().getScaledInstance(size, size, Image.SCALE_SMOOTH));
-        } catch (Exception e) {
-            System.err.println("Icon not found at: " + path);
-            return null;
+    /**
+     * Helper method to load an ImageIcon from the resource path.
+     * @param name The name of the icon file (e.g., "clear.png").
+     * @return An ImageIcon, or null if the resource is not found.
+     */
+    private ImageIcon loadIcon(String name) {
+        // Use an absolute path from the classpath root for reliability.
+        // This requires your icons to be in a path like 'src/icons/'.
+        String path = "/icons/" + name;
+        URL iconUrl = getClass().getResource(path);
+        if (iconUrl != null) {
+            ImageIcon originalIcon = new ImageIcon(iconUrl);
+            Image scaledImage = originalIcon.getImage().getScaledInstance(ICON_WIDTH, ICON_HEIGHT, Image.SCALE_SMOOTH);
+            return new ImageIcon(scaledImage);
         }
+        System.err.println("Icon not found: " + path);
+        return null;
     }
 }
-
-

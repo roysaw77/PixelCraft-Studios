@@ -5,7 +5,6 @@ import java.beans.PropertyChangeListener;
 
 public class DrawingStudioPro extends JFrame implements PropertyChangeListener {
     private CanvasPanel leftCanvas;
-    private CanvasPanel rightCanvas;
     private AppToolbar toolbar;
 
     public DrawingStudioPro() {
@@ -13,45 +12,42 @@ public class DrawingStudioPro extends JFrame implements PropertyChangeListener {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
-        // Define dimensions for the canvases
-        int canvasWidth = 500;
-        int canvasHeight = 500;
-
         // Initialize canvases
-        leftCanvas = new CanvasPanel(canvasWidth, canvasHeight, false); // Composition canvas
-        rightCanvas = new CanvasPanel(canvasWidth, canvasHeight, true); // Freehand drawing canvas
+        leftCanvas = new CanvasPanel(500, 500, false); // Composition canvas
+        CanvasPanel rightCanvas = new CanvasPanel(500, 500, true); // Freehand drawing canvas
         leftCanvas.addPropertyChangeListener(this); // Listen for selected item changes
-        // Setup toolbar using the dedicated AppToolbar class
-        toolbar = new AppToolbar(this, leftCanvas, rightCanvas);
+
+        // Setup toolbar, which wires up all actions
+        toolbar = new AppToolbar(this, leftCanvas, rightCanvas); //
 
         // Layout using JSplitPane for resizable canvas areas
-        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftCanvas, rightCanvas);
-        splitPane.setResizeWeight(0.5);
-        splitPane.setOneTouchExpandable(true);
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftCanvas, rightCanvas); //
+        splitPane.setResizeWeight(0.5); //
 
-        add(toolbar, BorderLayout.NORTH);
-        add(splitPane, BorderLayout.CENTER);
+        add(toolbar, BorderLayout.NORTH); //
+        add(splitPane, BorderLayout.CENTER); //
 
-        pack();
-        setLocationRelativeTo(null);
+        pack(); //
+        setLocationRelativeTo(null); //
     }
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        if (evt.getSource() == leftCanvas && "selectedItem".equals(evt.getPropertyName())) {
-            DrawableItem newItem = (DrawableItem) evt.getNewValue();
-            JSlider itemRotationSlider = toolbar.getItemRotationSlider();
+        // This logic correctly updates the UI based on events from the CanvasPanel.
+        if (evt.getSource() == leftCanvas && "selectedItem".equals(evt.getPropertyName())) { //
+            DrawableItem newItem = (DrawableItem) evt.getNewValue(); //
+            JSlider itemRotationSlider = toolbar.getItemRotationSlider(); //
 
-            if (newItem instanceof CreationItem) {
-                itemRotationSlider.setEnabled(true);
-                itemRotationSlider.setValue((int) Math.round(((CreationItem) newItem).getRotationAngle()));
+            if (newItem instanceof CreationItem) { //
+                itemRotationSlider.setEnabled(true); //
+                itemRotationSlider.setValue((int) Math.round(((CreationItem) newItem).getRotationAngle())); //
             } else {
-                itemRotationSlider.setEnabled(false);
-                itemRotationSlider.setValue(0); // Reset slider
+                itemRotationSlider.setEnabled(false); //
             }
         }
     }
+
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new DrawingStudioPro().setVisible(true));
+        SwingUtilities.invokeLater(() -> new DrawingStudioPro().setVisible(true)); //
     }
 }

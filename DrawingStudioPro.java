@@ -40,7 +40,7 @@ public class DrawingStudioPro extends JFrame implements PropertyChangeListener {
 
             if (newItem instanceof CreationItem) {
                 itemRotationSlider.setEnabled(true);
-                itemRotationSlider.setValue((int) Math.round(((CreationItem) newItem).getRotationAngle())); 
+                itemRotationSlider.setValue((int) Math.round(((CreationItem) newItem).getRotationAngle()));
             } else {
                 itemRotationSlider.setEnabled(false);
             }

@@ -28,7 +28,7 @@ public class CanvasPanel extends JPanel {
         support = new PropertyChangeSupport(this);
 
         if (!isCompositionCanvas) {
-            freehandCanvas = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB); 
+            freehandCanvas = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
             freehandGraphics = freehandCanvas.createGraphics();
             freehandGraphics.setColor(Color.WHITE);
             freehandGraphics.fillRect(0, 0, width, height);
@@ -66,7 +66,7 @@ public class CanvasPanel extends JPanel {
                     if (freehandCanvas != null) {
                         g2.drawImage(freehandCanvas, 0, 0, null);
                     }
-                    g2.dispose(); //
+                    g2.dispose();
                     freehandCanvas = newDrawingSurface;
                     freehandGraphics = freehandCanvas.createGraphics();
                     freehandGraphics.setColor(penColor);
@@ -85,14 +85,12 @@ public class CanvasPanel extends JPanel {
                         if (item instanceof CreationItem && ((CreationItem) item).contains(e.getPoint())) {
                             selectedItem = item;
                             dragStartPoint = e.getPoint();
-                            // Move to top for rendering and selection priority
                             items.remove(item);
                             items.add(item);
                             repaint();
                             break;
                         }
                     }
-                    // Fire property change regardless of whether an item was found or not (could be deselection)
                     support.firePropertyChange("selectedItem", oldSelectedItem, selectedItem);
                     repaint();
                 }
@@ -105,23 +103,9 @@ public class CanvasPanel extends JPanel {
                 @Override
                 public void mouseClicked(MouseEvent e) {
                     if (e.getClickCount() == 2 && selectedItem != null) {
-                        // Flip animal images on double-click
-                        if (selectedItem instanceof ImageCreationItem) {
-                            // Heuristic: animal images are in assets/animals/
-                            if (selectedItem instanceof ImageCreationItem) {
-                                ImageCreationItem imgItem = (ImageCreationItem) selectedItem;
-                                // Try to access resourcePath via reflection (since it's private)
-                                try {
-                                    java.lang.reflect.Field f = ImageCreationItem.class.getDeclaredField("image");
-                                    f.setAccessible(true);
-                                    f.get(imgItem); // Access image via reflection
-                                    selectedItem.flip();
-                                    repaint();
-                                } catch (Exception ex) {
-                                    selectedItem.flip();
-                                    repaint();
-                                }
-                            }
+                        if (selectedItem instanceof AnimalItem) {
+                            selectedItem.flip();
+                            repaint();
                         }
                     }
                 }
@@ -131,9 +115,7 @@ public class CanvasPanel extends JPanel {
                 @Override
                 public void mouseDragged(MouseEvent e) {
                     if (selectedItem != null && dragStartPoint != null && selectedItem instanceof CreationItem) {
-                        // Scale flower images with Ctrl+drag
-                        if ((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) != 0 && selectedItem instanceof ImageCreationItem) {
-                            // Heuristic: flower images are in assets/flowers/
+                        if ((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) != 0 && selectedItem instanceof FlowerItem) {
                             double dx = e.getX() - dragStartPoint.x;
                             double dy = e.getY() - dragStartPoint.y;
                             double dist = Math.sqrt(dx*dx + dy*dy);
@@ -141,8 +123,7 @@ public class CanvasPanel extends JPanel {
                             if (scale > 0.1) selectedItem.scale(scale);
                             dragStartPoint = e.getPoint();
                             repaint();
-                        } else {
-                            // Transpose custom drawn images
+                        } else if (selectedItem instanceof FlowerItem || selectedItem instanceof AnimalItem || selectedItem instanceof CustomImageItem) {
                             selectedItem.transpose(e.getX() - dragStartPoint.x, e.getY() - dragStartPoint.y);
                             dragStartPoint = e.getPoint();
                             repaint();
@@ -161,7 +142,6 @@ public class CanvasPanel extends JPanel {
         items.add(item);
         repaint();
     }
-
 
     public void clear() {
         items.clear();

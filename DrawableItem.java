@@ -4,7 +4,6 @@ import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 import java.io.IOException;
 
-// Interface defining the contract for all drawable objects
 public interface DrawableItem {
     void draw(Graphics2D g2d);
     void rotate(double angle);
@@ -13,8 +12,6 @@ public interface DrawableItem {
     void transpose(int dx, int dy);
 }
 
-// Abstract base class for all manipulable items.
-// It handles all transformation logic (position, rotation, scale, flip).
 abstract class CreationItem implements DrawableItem {
     protected int x, y;
     protected int width, height;
@@ -73,7 +70,6 @@ abstract class CreationItem implements DrawableItem {
     }
 }
 
-// Concrete class for items created from a BufferedImage
 class CustomImageItem extends CreationItem {
     private BufferedImage image;
     public CustomImageItem(int x, int y, BufferedImage image) {
@@ -98,34 +94,66 @@ class CustomImageItem extends CreationItem {
     }
 }
 
-// Reusable class for items loaded from an image file path.
-class ImageCreationItem extends CreationItem {
+class AnimalItem extends CreationItem {
     private BufferedImage image;
-
-    public ImageCreationItem(int x, int y, String resourcePath, int width, int height) {
+    public AnimalItem(int x, int y, String resourcePath, int width, int height) {
         super(x, y);
         this.width = width;
         this.height = height;
         try {
             java.net.URL imageUrl = getClass().getResource(resourcePath);
             if (imageUrl == null) throw new IOException("Resource not found: " + resourcePath);
-            this.image = ImageIO.read(imageUrl); 
+            this.image = ImageIO.read(imageUrl);
         } catch (IOException e) {
             this.image = null;
             System.err.println("Error loading image: " + e.getMessage());
         }
     }
-
     @Override
     protected void drawContent(Graphics2D g2d) {
         if (image != null) {
             g2d.drawImage(image, 0, 0, this.width, this.height, null);
         } else {
-            // Draw a placeholder if the image failed to load
             g2d.setColor(java.awt.Color.RED);
             g2d.fillRect(0, 0, this.width, this.height);
             g2d.setColor(java.awt.Color.WHITE);
             g2d.drawString("ERR", 5, 20);
         }
     }
+    @Override
+    public void flip() { this.flippedX = !this.flippedX; }
+    @Override
+    public void scale(double factor) { }
+}
+
+class FlowerItem extends CreationItem {
+    private BufferedImage image;
+    public FlowerItem(int x, int y, String resourcePath, int width, int height) {
+        super(x, y);
+        this.width = width;
+        this.height = height;
+        try {
+            java.net.URL imageUrl = getClass().getResource(resourcePath);
+            if (imageUrl == null) throw new IOException("Resource not found: " + resourcePath);
+            this.image = ImageIO.read(imageUrl);
+        } catch (IOException e) {
+            this.image = null;
+            System.err.println("Error loading image: " + e.getMessage());
+        }
+    }
+    @Override
+    protected void drawContent(Graphics2D g2d) {
+        if (image != null) {
+            g2d.drawImage(image, 0, 0, this.width, this.height, null);
+        } else {
+            g2d.setColor(java.awt.Color.RED);
+            g2d.fillRect(0, 0, this.width, this.height);
+            g2d.setColor(java.awt.Color.WHITE);
+            g2d.drawString("ERR", 5, 20);
+        }
+    }
+    @Override
+    public void scale(double factor) { this.scaleFactor *= factor; }
+    @Override
+    public void flip() {}
 }

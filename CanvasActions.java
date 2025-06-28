@@ -14,9 +14,9 @@ public class CanvasActions {
     public static class AddAssetAction extends AbstractAction {
     private JFrame owner;
     private CanvasPanel compositionCanvas;
-    private String assetType; // "Animal", "Flower"
-    private String[] assetNames; // {"Lion", "Tiger"}, {"Rose", "Tulip"}
-    private String assetBasePath; // "/assets/animals/", "/assets/flowers/"
+    private String assetType;
+    private String[] assetNames;
+    private String assetBasePath;
     private ItemFactory itemFactory;
 
     public AddAssetAction(String assetType, ImageIcon icon, JFrame owner, CanvasPanel compositionCanvas, String[] assetNames, String assetBasePath, ItemFactory itemFactory) {
@@ -159,7 +159,7 @@ public class CanvasActions {
         if (sizeStr != null) {
             try {
                 int size = Integer.parseInt(sizeStr);
-                if (size > 0 && size < 50) { // Basic validation
+                if (size > 0 && size < 50) {
                     drawingCanvas.setStrokeSize(size);
                 } else {
                     JOptionPane.showMessageDialog(owner, "Stroke size must be between 1 and 49.", "Invalid Size", JOptionPane.ERROR_MESSAGE);
@@ -198,7 +198,7 @@ public class CanvasActions {
         }
     }
 
-    public static class MergeCanvasAction extends AbstractAction { //
+    public static class MergeCanvasAction extends AbstractAction {
         private CanvasPanel canvas;
         private JSlider canvasRotationSlider;
         public MergeCanvasAction(String text, ImageIcon icon, CanvasPanel canvas, JSlider slider) {
@@ -206,17 +206,17 @@ public class CanvasActions {
             putValue(SHORT_DESCRIPTION, "Merge all items on the left canvas into a single new image item");
         }
         public void actionPerformed(ActionEvent e) {
-            if (canvas.getItems().isEmpty()) { return; } //
-            BufferedImage mergedImage = canvas.getComposedImage(); //
+            if (canvas.getItems().isEmpty()) { return; }
+            BufferedImage mergedImage = canvas.getComposedImage();
             if (mergedImage != null) {
                 canvas.clear(); canvas.setCanvasRotationAngle(0);
                 canvasRotationSlider.setValue(0);
-                canvas.addItem(new CustomImageItem(0, 0, mergedImage)); //
+                canvas.addItem(new CustomImageItem(0, 0, mergedImage));
             }
         }
     }
 
-    public static class SaveCompositionAction extends AbstractAction { //
+    public static class SaveCompositionAction extends AbstractAction {
          private JFrame owner;
          private CanvasPanel compositionCanvas;
          public SaveCompositionAction(String text, ImageIcon icon, JFrame owner, CanvasPanel canvas) {
@@ -226,7 +226,7 @@ public class CanvasActions {
          public void actionPerformed(ActionEvent e) {
              JFileChooser fc = new JFileChooser(); fc.setDialogTitle("Save Composition As");
              fc.setSelectedFile(new File("my_composition.png")); //
-             fc.addChoosableFileFilter(new FileNameExtensionFilter("PNG Image", "png")); //
+             fc.addChoosableFileFilter(new FileNameExtensionFilter("PNG Image", "png"));
              if (fc.showSaveDialog(owner) == JFileChooser.APPROVE_OPTION) {
                  try {
                      ImageIO.write(compositionCanvas.getComposedImage(), "png", fc.getSelectedFile());
@@ -235,7 +235,7 @@ public class CanvasActions {
          }
     }
 
-    public static class SaveDrawingAction extends AbstractAction { //
+    public static class SaveDrawingAction extends AbstractAction {
         private JFrame owner;
         private CanvasPanel drawingCanvas;
         private List<BufferedImage> library;
@@ -245,12 +245,12 @@ public class CanvasActions {
         }
         public void actionPerformed(ActionEvent e) {
             JFileChooser fc = new JFileChooser(); fc.setDialogTitle("Save Drawing As");
-            fc.setSelectedFile(new File("my_drawing.png")); //
-            fc.addChoosableFileFilter(new FileNameExtensionFilter("PNG Image", "png")); //
+            fc.setSelectedFile(new File("my_drawing.png"));
+            fc.addChoosableFileFilter(new FileNameExtensionFilter("PNG Image", "png"));
              if (fc.showSaveDialog(owner) == JFileChooser.APPROVE_OPTION) {
                  try {
                      BufferedImage drawing = drawingCanvas.getFreehandImage();
-                     ImageIO.write(drawing, "png", fc.getSelectedFile()); //
+                     ImageIO.write(drawing, "png", fc.getSelectedFile());
                      library.add(drawing); //
                      JOptionPane.showMessageDialog(owner, "Drawing saved and added to library.", "Save Successful", JOptionPane.INFORMATION_MESSAGE); //
                  } catch (Exception ex) { /* ...error handling... */ }

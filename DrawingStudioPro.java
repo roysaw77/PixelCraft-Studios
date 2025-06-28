@@ -18,36 +18,36 @@ public class DrawingStudioPro extends JFrame implements PropertyChangeListener {
         leftCanvas.addPropertyChangeListener(this); // Listen for selected item changes
 
         // Setup toolbar, which wires up all actions
-        toolbar = new AppToolbar(this, leftCanvas, rightCanvas); //
+        toolbar = new AppToolbar(this, leftCanvas, rightCanvas);
 
         // Layout using JSplitPane for resizable canvas areas
-        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftCanvas, rightCanvas); //
-        splitPane.setResizeWeight(0.5); //
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftCanvas, rightCanvas);
+        splitPane.setResizeWeight(0.5);
 
-        add(toolbar, BorderLayout.NORTH); //
-        add(splitPane, BorderLayout.CENTER); //
+        add(toolbar, BorderLayout.NORTH);
+        add(splitPane, BorderLayout.CENTER);
 
-        pack(); //
-        setLocationRelativeTo(null); //
+        pack();
+        setLocationRelativeTo(null);
     }
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         // This logic correctly updates the UI based on events from the CanvasPanel.
-        if (evt.getSource() == leftCanvas && "selectedItem".equals(evt.getPropertyName())) { //
-            DrawableItem newItem = (DrawableItem) evt.getNewValue(); //
-            JSlider itemRotationSlider = toolbar.getItemRotationSlider(); //
+        if (evt.getSource() == leftCanvas && "selectedItem".equals(evt.getPropertyName())) {
+            DrawableItem newItem = (DrawableItem) evt.getNewValue();
+            JSlider itemRotationSlider = toolbar.getItemRotationSlider();
 
-            if (newItem instanceof CreationItem) { //
-                itemRotationSlider.setEnabled(true); //
-                itemRotationSlider.setValue((int) Math.round(((CreationItem) newItem).getRotationAngle())); //
+            if (newItem instanceof CreationItem) {
+                itemRotationSlider.setEnabled(true);
+                itemRotationSlider.setValue((int) Math.round(((CreationItem) newItem).getRotationAngle())); 
             } else {
-                itemRotationSlider.setEnabled(false); //
+                itemRotationSlider.setEnabled(false);
             }
         }
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new DrawingStudioPro().setVisible(true)); //
+        SwingUtilities.invokeLater(() -> new DrawingStudioPro().setVisible(true));
     }
 }

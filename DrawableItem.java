@@ -73,33 +73,32 @@ abstract class CreationItem implements DrawableItem {
     }
 }
 
-// Concrete class for items created from a BufferedImage (e.g., from the library or a merge).
+// Concrete class for items created from a BufferedImage
 class CustomImageItem extends CreationItem {
     private BufferedImage image;
     public CustomImageItem(int x, int y, BufferedImage image) {
         super(x, y);
         this.image = image;
         if (image != null) {
-            this.width = image.getWidth(); //
-            this.height = image.getHeight(); //
+            this.width = image.getWidth();
+            this.height = image.getHeight();
         } else {
-            this.width = 50; this.height = 50; //
+            this.width = 50; this.height = 50;
         }
     }
 
     @Override
     protected void drawContent(Graphics2D g2d) {
         if (image != null) {
-            g2d.drawImage(image, 0, 0, this.width, this.height, null); //
+            g2d.drawImage(image, 0, 0, this.width, this.height, null);
         } else {
-            g2d.setColor(java.awt.Color.GRAY); //
-            g2d.fillRect(0, 0, this.width, this.height); //
+            g2d.setColor(java.awt.Color.GRAY);
+            g2d.fillRect(0, 0, this.width, this.height);
         }
     }
 }
 
-// A generic, reusable class for items loaded from an image file path.
-// This class replaces the redundant FlowerItem and AnimalItem classes.
+// Reusable class for items loaded from an image file path.
 class ImageCreationItem extends CreationItem {
     private BufferedImage image;
 
@@ -110,10 +109,10 @@ class ImageCreationItem extends CreationItem {
         try {
             java.net.URL imageUrl = getClass().getResource(resourcePath);
             if (imageUrl == null) throw new IOException("Resource not found: " + resourcePath);
-            this.image = ImageIO.read(imageUrl); //
+            this.image = ImageIO.read(imageUrl); 
         } catch (IOException e) {
             this.image = null;
-            System.err.println("Error loading image: " + e.getMessage()); //
+            System.err.println("Error loading image: " + e.getMessage());
         }
     }
 
